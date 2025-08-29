@@ -83,23 +83,25 @@ public class ManejoFiles {
         }
     }
 
-    public void mostrarDir() {
-        if (!rutaActual.exists()) {
-            System.out.println("\nError: directorio no existe: " + rutaActual.getPath());
+    public void mostrarDir(String nombre) {
+        File target = new File(rutaActual, nombre);
+        
+        if (!target.exists()) {
+            System.out.println("\nError: directorio no existe.");
             return;
         }
-        if (!rutaActual.isDirectory()) {
-            System.out.println("\nError: no es un directorio: " + rutaActual.getPath());
+        if (!target.isDirectory()) {
+            System.out.println("\nError: no es un directorio: " + target.getPath());
             return;
         }
 
-        System.out.println("\nDirectorio de: " + rutaActual.getAbsolutePath());
-        dir(rutaActual);
+        System.out.println("\nDirectorio de: " + target.getAbsolutePath());
+        dir(target);
     }
 
     private void dir(File dir) {
         File children[] = dir.listFiles();
-
+        
         if (children == null) {
             System.out.println("Directorio no posee archivos.");
             return;
