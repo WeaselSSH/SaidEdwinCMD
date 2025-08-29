@@ -83,7 +83,7 @@ public class ManejoFiles {
         }
     }
 
-    public void MostrarDir(String nombre) {
+    public void mostrarDir(String nombre) {
         File target = new File(rutaActual, nombre);
         
         if (!target.exists()) {
