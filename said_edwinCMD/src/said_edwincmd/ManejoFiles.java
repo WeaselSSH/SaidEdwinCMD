@@ -2,6 +2,8 @@ package said_edwincmd;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ManejoFiles {
 
@@ -10,7 +12,7 @@ public class ManejoFiles {
     public ManejoFiles(String rutaInicial) {
         this.rutaActual = new File(rutaInicial);
     }
-    
+
     public void cd(File nuevaRuta) {
         this.rutaActual = nuevaRuta;
     }
@@ -80,8 +82,66 @@ public class ManejoFiles {
             return false;
         }
     }
-    
-    public void dir() {
-        
+
+    public void mostrarDir() {
+        if (!rutaActual.exists()) {
+            System.out.println("\nError: directorio no existe: " + rutaActual.getPath());
+            return;
+        }
+        if (!rutaActual.isDirectory()) {
+            System.out.println("\nError: no es un directorio: " + rutaActual.getPath());
+            return;
+        }
+
+        System.out.println("\nDirectorio de: " + rutaActual.getAbsolutePath());
+        dir(rutaActual);
     }
+
+    private void dir(File dir) {
+        File children[] = dir.listFiles();
+
+        if (children == null) {
+            System.out.println("Directorio no posee archivos.");
+            return;
+        }
+
+        int cantArchivos = 0;
+        int cantDir = 0;
+        long bytesArchivos = 0;
+
+        System.out.printf("%-19s  %-6s  %12s  %-30s%n",
+                "Última Modificación", "Tipo", "Tamaño", "Nombre");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        for (File child : children) {
+            if (child.isHidden()) {
+                continue;
+            }
+
+            String fecha = sdf.format(new Date(child.lastModified()));
+            String tipo = child.isDirectory() ? "<DIR>" : "FILE";
+
+            String tamStr;
+            if (child.isDirectory()) {
+                tamStr = "";
+                cantDir++;
+            } else {
+                long sizeBytes = child.length();
+                long sizeKB = (sizeBytes + 1024) / 1024;
+                tamStr = sizeKB + " KB";
+                cantArchivos++;
+                bytesArchivos += sizeBytes;
+            }
+
+            System.out.printf("%-19s  %-6s  %12s  %-30s%n",
+                    fecha, tipo, tamStr, child.getName());
+        }
+
+        long totalKB = (bytesArchivos + 1024) / 1024;
+
+        System.out.printf("%n%d Archivo(s) %d KB%n", cantArchivos, totalKB);
+        System.out.printf("%d Directorio(s)%n", cantDir);
+    }
+
 }
