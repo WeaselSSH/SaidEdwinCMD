@@ -1,6 +1,9 @@
 package said_edwincmd;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,7 +88,7 @@ public class ManejoFiles {
 
     public void mostrarDir(String nombre) {
         File target = new File(rutaActual, nombre);
-        
+
         if (!target.exists()) {
             System.out.println("\nError: directorio no existe.");
             return;
@@ -101,7 +104,7 @@ public class ManejoFiles {
 
     private void dir(File dir) {
         File children[] = dir.listFiles();
-        
+
         if (children == null) {
             System.out.println("Directorio no posee archivos.");
             return;
@@ -144,6 +147,57 @@ public class ManejoFiles {
 
         System.out.printf("%n%d Archivo(s) %d KB%n", cantArchivos, totalKB);
         System.out.printf("%d Directorio(s)%n", cantDir);
+    }
+
+    public boolean wr(String nombre, String texto) {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            System.out.println("Error: nombre no válido.");
+            return false;
+        }
+
+        File target = new File(rutaActual, nombre);
+
+        if (!target.exists() || target.isDirectory()) {
+            System.out.println("Error: seleccione un archivo válido.");
+            return false;
+        }
+
+        try (FileWriter fw = new FileWriter(target, false)) {
+            fw.write(texto);
+            System.out.println("Texto escrito en archivo: " + target.getPath());
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error al escribir archivo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public String rd(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            System.out.println("Error: nombre no válido.");
+            return null;
+        }
+
+        File target = new File(rutaActual, nombre);
+
+        if (!target.exists() || target.isDirectory()) {
+            System.out.println("Error: seleccione un archivo válido.");
+            return null;
+        }
+
+        StringBuilder contenido = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(target))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                contenido.append(linea).append("\n");
+            }
+        } catch (IOException e) {
+            System.out.println("Error al leer archivo: " + e.getMessage());
+            return null;
+        }
+
+        return contenido.toString();
     }
 
 }
