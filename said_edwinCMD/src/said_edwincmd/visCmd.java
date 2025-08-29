@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat; // Importado para el comando 'dir'
+import java.text.SimpleDateFormat; 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -96,27 +96,23 @@ public class visCmd extends JFrame {
                 case "cd":
                     cambiarDirectorio(argumento);
                     break;
-                // NUEVO: Comando 'dir' implementado aquí.
                 case "dir":
                     imprimir(listarDirectorio());
                     break;
-                // CORREGIDO: Lógica para manejar el boolean de mkdir.
                 case "mkdir":
                     if (fileManager.mkdir(argumento)) {
                         imprimir("Directorio creado.\n");
                     } else {
-                        imprimir("No se pudo crear el directorio. Puede que ya exista o el nombre sea inválido.\n");
+                        imprimir("No se pudo crear el directorio. Puede que ya exista o el nombre sea invalido.\n");
                     }
                     break;
-                // CORREGIDO: Lógica para manejar el boolean de mfile.
                 case "mfile":
                      if (fileManager.mfile(argumento)) {
                         imprimir("Archivo creado.\n");
                     } else {
-                        imprimir("No se pudo crear el archivo. Puede que ya exista o el nombre sea inválido.\n");
+                        imprimir("No se pudo crear el archivo. Puede que ya exista o el nombre sea invalido.\n");
                     }
                     break;
-                // CORREGIDO: Lógica para manejar el boolean de rm.
                 case "rm":
                     if (fileManager.rm(argumento)) {
                         imprimir("Archivo/directorio eliminado.\n");
@@ -148,7 +144,6 @@ public class visCmd extends JFrame {
         prompt();
     }
     
-    // NUEVO: Método para implementar la funcionalidad de 'dir'.
     private String listarDirectorio() {
         File[] files = currentPath.listFiles();
         StringBuilder sb = new StringBuilder();
@@ -187,7 +182,6 @@ public class visCmd extends JFrame {
 
         if (nuevaRuta != null && nuevaRuta.exists() && nuevaRuta.isDirectory()) {
             currentPath = nuevaRuta;
-            // CORREGIDO: Se llama al método 'cd' en lugar de 'setRutaActual'.
             fileManager.cd(currentPath);
         } else {
             imprimir("The system cannot find the path specified.\n");

@@ -15,7 +15,7 @@ public class ManejoFiles {
         this.rutaActual = nuevaRuta;
     }
 
-    public boolean mkdir(String nombre) {
+    public boolean mkdir(String nombre) {   
         if (nombre == null || nombre.trim().isEmpty()) {
             System.out.println("Error: nombre no válido.");
             return false;
