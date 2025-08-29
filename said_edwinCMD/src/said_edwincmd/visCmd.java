@@ -5,40 +5,45 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat; 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class visCmd extends JFrame {
 
-    private final JTextArea area = new JTextArea();
+    private final JTextArea area;
     private int inicioEntrada;
-    private File currentPath;
-    private ManejoFiles fileManager;
+    private File rutaActual;
+    private ManejoFiles gestorArchivos;
 
     public visCmd() {
-        super("Command Prompt");
+        super("Símbolo del sistema");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
         setLocationRelativeTo(null);
 
+        area = new JTextArea();
+        area.setEditable(true);
         area.setBackground(Color.BLACK);
         area.setForeground(Color.WHITE);
         area.setCaretColor(Color.WHITE);
         area.setFont(new Font("Consolas", Font.PLAIN, 14));
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
+        add(new JScrollPane(area));
 
-        JScrollPane scroll = new JScrollPane(area);
-        add(scroll);
+        PrintStream printStream = new PrintStream(new CustomOutputStream(area));
+        System.setOut(printStream);
+        System.setErr(printStream);
 
         area.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     e.consume();
-                    ejecutarLinea();
+                    ejecutarComando();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                     if (area.getCaretPosition() <= inicioEntrada) {
@@ -48,152 +53,148 @@ public class visCmd extends JFrame {
             }
         });
 
-        String userDir = System.getProperty("user.dir");
-        currentPath = new File(userDir);
-        fileManager = new ManejoFiles(userDir);
-
-        imprimir("Microsoft Windows [Version 10.0.22621.521]\n");
-        imprimir("(c) Microsoft Corporation. All rights reserved.\n\n");
+        String dirUsuario = System.getProperty("user.dir");
+        rutaActual = new File(dirUsuario);
+        gestorArchivos = new ManejoFiles(dirUsuario);
+        
+        promptInicial();
+    }
+    
+    private void promptInicial() {
+        System.out.print("Microsoft Windows [Versión 10.0.22621.521]\n");
+        System.out.print("(c) Microsoft Corporation. Todos los derechos reservados.\n\n");
         prompt();
     }
-
+    
     private void prompt() {
-        imprimir(currentPath.getAbsolutePath() + ">");
+        System.out.print(rutaActual.getAbsolutePath() + ">");
         inicioEntrada = area.getDocument().getLength();
     }
 
-    private void ejecutarLinea() {
-        String texto = area.getText();
-        String comandoCompleto = texto.substring(inicioEntrada).trim();
-        imprimir("\n");
+    private void ejecutarComando() {
+        String textoCompleto = area.getText();
+        String textoComando = textoCompleto.substring(inicioEntrada).trim();
+        System.out.print("\n");
 
-        if (comandoCompleto.isEmpty()) {
+        if (textoComando.isEmpty()) {
             prompt();
             return;
         }
 
-        String[] partesComando = comandoCompleto.split("\\s+", 2);
-        String comando = partesComando[0].toLowerCase();
-        String argumento = partesComando.length > 1 ? partesComando[1] : "";
+        String[] partes = textoComando.split("\\s+", 2);
+        String comando = partes[0].toLowerCase();
+        String argumento = partes.length > 1 ? partes[1] : "";
 
         try {
             switch (comando) {
-                case "exit":
+                case "exit": case "salir":
                     System.exit(0);
                     break;
-                case "cls":
+                case "cls": case "limpiar":
                     area.setText("");
-                    break;
+                    prompt();
+                    return;
                 case "echo":
-                    imprimir(argumento + "\n");
+                    System.out.println(argumento);
                     break;
-                case "date":
-                    imprimir("The current date is: " + LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) + "\n");
+                case "date": case "fecha":
+                    System.out.println("La fecha actual es: " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                     break;
-                case "time":
-                    imprimir("The current time is: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")) + "\n");
+                case "time": case "hora":
+                    System.out.println("La hora actual es: " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                     break;
                 case "cd":
                     cambiarDirectorio(argumento);
                     break;
                 case "dir":
-                    imprimir(listarDirectorio());
+                    gestorArchivos.mostrarDir(argumento);
                     break;
                 case "mkdir":
-                    if (fileManager.mkdir(argumento)) {
-                        imprimir("Directorio creado.\n");
-                    } else {
-                        imprimir("No se pudo crear el directorio. Puede que ya exista o el nombre sea invalido.\n");
-                    }
+                    gestorArchivos.mkdir(argumento);
                     break;
                 case "mfile":
-                     if (fileManager.mfile(argumento)) {
-                        imprimir("Archivo creado.\n");
-                    } else {
-                        imprimir("No se pudo crear el archivo. Puede que ya exista o el nombre sea invalido.\n");
-                    }
+                    gestorArchivos.mfile(argumento);
                     break;
                 case "rm":
-                    if (fileManager.rm(argumento)) {
-                        imprimir("Archivo/directorio eliminado.\n");
+                    gestorArchivos.rm(argumento);
+                    break;
+                case "wr":
+                    String[] argsWr = argumento.split("\\s+", 2);
+                    if (argsWr.length < 2) {
+                        System.out.println("Uso incorrecto. Sintaxis: wr <archivo> <texto para escribir>");
                     } else {
-                        imprimir("No se pudo eliminar. Verifique que el archivo/directorio exista y que no esté en uso.\n");
+                        gestorArchivos.wr(argsWr[0], argsWr[1]);
                     }
                     break;
-                case "help":
-                    imprimir("Comandos disponibles:\n");
-                    imprimir("  CLS              Limpia la pantalla.\n");
-                    imprimir("  DATE             Muestra la fecha actual.\n");
-                    imprimir("  TIME             Muestra la hora actual.\n");
-                    imprimir("  DIR              Muestra la lista de archivos y directorios.\n");
-                    imprimir("  ECHO <msg>       Muestra un mensaje.\n");
-                    imprimir("  CD <dir>         Cambia de directorio (usa '..' para retroceder).\n");
-                    imprimir("  MKDIR <dir>      Crea un directorio.\n");
-                    imprimir("  MFILE <file>     Crea un archivo vacío.\n");
-                    imprimir("  RM <file/dir>    Elimina un archivo o directorio.\n");
-                    imprimir("  EXIT             Cierra la consola.\n");
+                case "rd":
+                    String contenido = gestorArchivos.rd(argumento);
+                    if (contenido != null) {
+                        System.out.print(contenido);
+                    }
+                    break;
+                case "help": case "ayuda":
+                    imprimirAyuda();
                     break;
                 default:
-                    imprimir("'" + comando + "' is not recognized as an internal or external command,\noperable program or batch file.\n");
+                    System.out.println("'" + comando + "' no se reconoce como un comando interno o externo,\nprograma o archivo por lotes ejecutable.");
                     break;
             }
         } catch (IOException e) {
-            imprimir("Error de I/O: " + e.getMessage() + "\n");
+            System.out.println("Error de Entrada/Salida: " + e.getMessage());
         }
 
         prompt();
     }
-    
-    private String listarDirectorio() {
-        File[] files = currentPath.listFiles();
-        StringBuilder sb = new StringBuilder();
-        sb.append(" Directory of ").append(currentPath.getAbsolutePath()).append("\n\n");
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy  hh:mm a");
-
-        if (files != null) {
-            for (File file : files) {
-                sb.append(sdf.format(file.lastModified()));
-                if (file.isDirectory()) {
-                    sb.append("    <DIR>          ");
-                } else {
-                    sb.append(String.format("    %,15d ", file.length()));
-                }
-                sb.append(file.getName()).append("\n");
-            }
-        }
-        return sb.toString();
-    }
 
     private void cambiarDirectorio(String ruta) {
         if (ruta.isEmpty()) {
-            imprimir(currentPath.getAbsolutePath() + "\n");
+            System.out.println(rutaActual.getAbsolutePath());
             return;
         }
-
         File nuevaRuta;
         if (ruta.equals("..")) {
-            nuevaRuta = currentPath.getParentFile();
+            nuevaRuta = rutaActual.getParentFile();
         } else {
             nuevaRuta = new File(ruta);
             if (!nuevaRuta.isAbsolute()) {
-                nuevaRuta = new File(currentPath, ruta);
+                nuevaRuta = new File(rutaActual, ruta);
             }
         }
-
         if (nuevaRuta != null && nuevaRuta.exists() && nuevaRuta.isDirectory()) {
-            currentPath = nuevaRuta;
-            fileManager.cd(currentPath);
+            rutaActual = nuevaRuta;
+            gestorArchivos.cd(rutaActual);
         } else {
-            imprimir("The system cannot find the path specified.\n");
+            System.out.println("El sistema no puede encontrar la ruta especificada.");
         }
     }
 
-    private void imprimir(String s) {
-        area.append(s);
-        area.setCaretPosition(area.getDocument().getLength());
+    private void imprimirAyuda() {
+        System.out.println("Comandos disponibles:");
+        System.out.println("  CLS, LIMPIAR         Limpia la pantalla.");
+        System.out.println("  DATE, FECHA          Muestra la fecha actual.");
+        System.out.println("  TIME, HORA           Muestra la hora actual.");
+        System.out.println("  DIR [directorio]     Muestra la lista de archivos y subdirectorios.");
+        System.out.println("  ECHO <mensaje>       Muestra un mensaje en pantalla.");
+        System.out.println("  CD <directorio>      Cambia de directorio (usa '..' para retroceder).");
+        System.out.println("  MKDIR <directorio>   Crea un directorio.");
+        System.out.println("  MFILE <archivo>      Crea un archivo vacío.");
+        System.out.println("  RM <archivo/dir>     Elimina un archivo o directorio.");
+        System.out.println("  WR <archivo> <texto> Escribe o sobrescribe texto en un archivo existente.");
+        System.out.println("  RD <archivo>         Muestra el contenido de un archivo de texto.");
+        System.out.println("  EXIT, SALIR          Cierra la consola.");
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new visCmd().setVisible(true));
+    }
+
+    public static class CustomOutputStream extends OutputStream {
+        private JTextArea textArea;
+        public CustomOutputStream(JTextArea textArea) { this.textArea = textArea; }
+        @Override
+        public void write(int b) throws IOException {
+            textArea.append(String.valueOf((char) b));
+            textArea.setCaretPosition(textArea.getDocument().getLength());
+        }
     }
 }
