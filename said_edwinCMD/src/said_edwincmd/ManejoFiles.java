@@ -144,9 +144,11 @@ public class ManejoFiles {
         }
 
         long totalKB = (bytesArchivos + 1024) / 1024;
+        long bytesLibres = dir.getFreeSpace();
 
         System.out.printf("%n%d Archivo(s) %d KB%n", cantArchivos, totalKB);
         System.out.printf("%d Directorio(s)%n", cantDir);
+        System.out.printf("%d Bytes libres %n", bytesLibres);
     }
 
     public boolean wr(String nombre, String texto) {
