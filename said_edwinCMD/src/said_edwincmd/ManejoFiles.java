@@ -19,7 +19,7 @@ public class ManejoFiles {
         File target = new File(rutaActual, nombre);
 
         if (target.exists()) {
-            System.out.println("Error: ya existe " + target.getPath());
+            System.out.println("Error: un archivo/directorio ya existe " + target.getPath());
             return false;
         }
 
