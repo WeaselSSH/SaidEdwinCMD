@@ -19,7 +19,7 @@ public class visCmd extends JFrame {
     private ManejoFiles gestorArchivos;
 
     public visCmd() {
-        super("Símbolo del sistema");
+        super("Simbolo del sistema");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 500);
         setLocationRelativeTo(null);

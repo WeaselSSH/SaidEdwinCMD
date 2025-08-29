@@ -44,7 +44,7 @@ public class ManejoFiles {
 
     public boolean mfile(String nombre) throws IOException {
         if (nombre == null || nombre.trim().isEmpty()) {
-            System.out.println("Error: nombre no válido.");
+            System.out.println("Error: nombre no valido.");
             return false;
         }
 
@@ -66,7 +66,7 @@ public class ManejoFiles {
 
     public boolean rm(String nombre) {
         if (nombre == null || nombre.trim().isEmpty()) {
-            System.out.println("Error: nombre no válido.");
+            System.out.println("Error: nombre no valido.");
             return false;
         }
 
@@ -115,7 +115,7 @@ public class ManejoFiles {
         long bytesArchivos = 0;
 
         System.out.printf("%-19s  %-6s  %12s  %-30s%n",
-                "Última Modificación", "Tipo", "Tamaño", "Nombre");
+                "Última Modificacion", "Tipo", "Tamano", "Nombre");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -160,7 +160,7 @@ public class ManejoFiles {
         File target = new File(rutaActual, nombre);
 
         if (!target.exists() || target.isDirectory()) {
-            System.out.println("Error: seleccione un archivo válido.");
+            System.out.println("Error: seleccione un archivo valido.");
             return false;
         }
 
@@ -176,14 +176,14 @@ public class ManejoFiles {
 
     public String rd(String nombre) {
         if (nombre == null || nombre.trim().isEmpty()) {
-            System.out.println("Error: nombre no válido.");
+            System.out.println("Error: nombre no valido.");
             return null;
         }
 
         File target = new File(rutaActual, nombre);
 
         if (!target.exists() || target.isDirectory()) {
-            System.out.println("Error: seleccione un archivo válido.");
+            System.out.println("Error: seleccione un archivo valido.");
             return null;
         }
 
