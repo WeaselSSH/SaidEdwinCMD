@@ -8,7 +8,11 @@ public class ManejoFiles {
     private File rutaActual;
 
     public ManejoFiles(String rutaInicial) {
-        File f = new File(rutaInicial);
+        this.rutaActual = new File(rutaInicial);
+    }
+    
+    public void cd(File nuevaRuta) {
+        this.rutaActual = nuevaRuta;
     }
 
     public boolean mkdir(String nombre) {
@@ -75,5 +79,9 @@ public class ManejoFiles {
             System.out.println("Error: no se pudo eliminar el archivo/directorio.");
             return false;
         }
+    }
+    
+    public void dir() {
+        
     }
 }
