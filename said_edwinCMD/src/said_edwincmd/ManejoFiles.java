@@ -22,7 +22,7 @@ public class ManejoFiles {
 
     public boolean mkdir(String nombre) {   
         if (nombre == null || nombre.trim().isEmpty()) {
-            System.out.println("Error: nombre no válido.");
+            System.out.println("Error: nombre no valido.");
             return false;
         }
 
